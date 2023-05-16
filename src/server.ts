@@ -46,7 +46,9 @@ fastify.post<{ Body: Omit<Product, 'id'> }>('/api/products', (request) => {
   return productRepo.create(request.body)
 })
 
-fastify.get('/api/products/:id', () => {
+fastify.get<{ Params: { id: string } }>('/api/products/:id', (request) => {
+  console.log(request.params.id)
+  const id = parseInt(request.params.id, 10)
   return 'get single product'
 })
 
