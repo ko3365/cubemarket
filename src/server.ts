@@ -1,5 +1,8 @@
-
 import Fastify from 'fastify'
+import ProductRepository from './repositories/ProductRepository'
+import { Product } from './models/Product'
+const productRepo = new ProductRepository()
+
 const fastify = Fastify({
   logger: true,
 })
@@ -36,11 +39,11 @@ fastify.patch('/api/me/notifications', () => {
 
 // Products
 fastify.get('/api/products', () => {
-  return 'get products'
+  return productRepo.findAll()
 })
 
-fastify.post('/api/products', () => {
-  return 'post products'
+fastify.post<{ Body: Omit<Product, 'id'> }>('/api/products', (request) => {
+  return productRepo.create(request.body)
 })
 
 fastify.get('/api/products/:id', () => {
