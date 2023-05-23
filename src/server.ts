@@ -47,13 +47,22 @@ fastify.post<{ Body: Omit<Product, 'id'> }>('/api/products', (request) => {
 })
 
 fastify.get<{ Params: { id: string } }>('/api/products/:id', (request) => {
-  console.log(request.params.id)
+  //console.log(request.params.id)
   const id = parseInt(request.params.id, 10)
-  return 'get single product'
+  return productRepo.findById(id)
 })
 
-fastify.put('/api/products/:id', () => {
-  return 'put single product'
+fastify.put<{ Params: { id: string }; Body: Omit<Product, 'id'> }>(
+  '/api/products/:id',
+  (request) => {
+    const id = parseInt(request.params.id, 10)
+    return productRepo.updateById(id, request.body)
+  }
+)
+
+fastify.delete<{ Params: { id: string } }>('/api/products/:id', (request) => {
+  const id = parseInt(request.params.id, 10)
+  productRepo.removeById(id)
 })
 
 fastify.listen({ port: 3000 }, function (err, address) {
@@ -62,3 +71,18 @@ fastify.listen({ port: 3000 }, function (err, address) {
     process.exit(1)
   }
 })
+
+/*
+interface example<T> {
+  name: string
+  price: number
+  option: T
+}
+
+function wrap<D>(data: D): { data: D } {
+  const value: D = data
+  return {
+    data: value,
+  }
+}
+*/
