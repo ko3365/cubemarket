@@ -60,9 +60,10 @@ fastify.put<{ Params: { id: string }; Body: Omit<Product, 'id'> }>(
   }
 )
 
-fastify.delete<{ Params: { id: string } }>('/api/products/:id', (request) => {
+fastify.delete<{ Params: { id: string } }>('/api/products/:id', (request, reply) => {
   const id = parseInt(request.params.id, 10)
   productRepo.removeById(id)
+  reply.status(204).send(undefined)
 })
 
 fastify.listen({ port: 3000 }, function (err, address) {

@@ -1,7 +1,17 @@
 import { Product } from '../models/Product'
 type ProductWithoutId = Omit<Product, 'id'>
+
+// Supabase Initialization
+import { createClient } from '@supabase/supabase-js'
+import dotenv from 'dotenv'
+
+dotenv.config()
+const supabaseUrl = process.env.SUPABASE_URL as string
+const supabaseKey = process.env.SUPABASE_KEY as string
+const supabase = createClient(supabaseUrl, supabaseKey)
+
 class ProductRepository {
-  nextId = 1
+  /*nextId = 1
   items: Product[] = []
 
   findIndexById(id: number): number | null {
@@ -12,9 +22,27 @@ class ProductRepository {
       return null
     }
     return itemIndex
+  }*/
+
+  async create(params: Omit<Product, 'id'>) {
+    const product = { ...params }
+    const { data, error } = await supabase.from('products').insert(product).select('*')
+    return data
   }
 
-  findById(id: number): Product | null {
+  async findAll() {
+    //return this.items
+    const { data, error } = await supabase.from('products').select('*')
+    return data
+  }
+
+  async findById(id: number) {
+    const id_string = id.toString()
+    const { data, error } = await supabase.from('products').select('*').eq('id', id_string)
+    return data
+
+    //: Product | null{
+    /*
     //items 에서 id 찾아 반환 없으면 null
     const item = this.items.find(function (item, index) {
       return item.id == id
@@ -24,9 +52,21 @@ class ProductRepository {
       return null
     }
     return item
+    */
   }
 
-  updateById(id: number, params: ProductWithoutId): Product | null {
+  async updateById(id: number, params: ProductWithoutId) {
+    const id_string = id.toString()
+    const product = { ...params }
+    const { data, error } = await supabase
+      .from('products')
+      .update(product)
+      .eq('id', id_string)
+      .select('*')
+    return data
+
+    //: Product | null{
+    /*
     const itemIndex = this.findIndexById(id)
     if (itemIndex === null) {
       return null
@@ -34,9 +74,14 @@ class ProductRepository {
     const product = { ...params, id: id }
     this.items[itemIndex] = product
     return product
+    */
   }
 
-  removeById(id: number): Product | null {
+  async removeById(id: number) {
+    const id_string = id.toString()
+    const { data, error } = await supabase.from('products').delete().eq('id', id_string).select('*')
+    return data
+    /*: Product | null {
     const itemIndex = this.findIndexById(id)
     if (itemIndex === null) {
       return null
@@ -45,16 +90,7 @@ class ProductRepository {
     const product = this.items[itemIndex]
     this.items.splice(itemIndex, 1)
     return product
-  }
-
-  findAll() {
-    return this.items
-  }
-  create(params: Omit<Product, 'id'>) {
-    const product = { ...params, id: this.nextId }
-    this.nextId += 1
-    this.items.push(product)
-    return product
+    */
   }
 }
 
