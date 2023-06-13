@@ -19,6 +19,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "@types/node": "^20.1.1"
+    "@types/node": "^20.1.1",
+    "supabase": "^1.64.8"
   }
 }

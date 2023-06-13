@@ -1,14 +1,6 @@
-import { Product } from '../models/Product'
-type ProductWithoutId = Omit<Product, 'id'>
-
-// Supabase Initialization
-import { createClient } from '@supabase/supabase-js'
-import dotenv from 'dotenv'
-
-dotenv.config()
-const supabaseUrl = process.env.SUPABASE_URL as string
-const supabaseKey = process.env.SUPABASE_KEY as string
-const supabase = createClient(supabaseUrl, supabaseKey)
+import { ProductType } from '../models/Product'
+type ProductWithoutId = Omit<ProductType, 'id'>
+import { supabase } from '../../lib/supabase'
 
 class ProductRepository {
   /*nextId = 1
@@ -24,19 +16,19 @@ class ProductRepository {
     return itemIndex
   }*/
 
-  async create(params: Omit<Product, 'id'>) {
+  async create(params: Omit<ProductType, 'id'>): Promise<ProductType[] | null> {
     const product = { ...params }
     const { data, error } = await supabase.from('products').insert(product).select('*')
     return data
   }
 
-  async findAll() {
+  async findAll(): Promise<ProductType[] | null> {
     //return this.items
     const { data, error } = await supabase.from('products').select('*')
     return data
   }
 
-  async findById(id: number) {
+  async findById(id: number): Promise<ProductType[] | null> {
     const id_string = id.toString()
     const { data, error } = await supabase.from('products').select('*').eq('id', id_string)
     return data
@@ -55,7 +47,7 @@ class ProductRepository {
     */
   }
 
-  async updateById(id: number, params: ProductWithoutId) {
+  async updateById(id: number, params: ProductWithoutId): Promise<ProductType[] | null> {
     const id_string = id.toString()
     const product = { ...params }
     const { data, error } = await supabase
@@ -77,7 +69,7 @@ class ProductRepository {
     */
   }
 
-  async removeById(id: number) {
+  async removeById(id: number): Promise<ProductType[] | null> {
     const id_string = id.toString()
     const { data, error } = await supabase.from('products').delete().eq('id', id_string).select('*')
     return data
