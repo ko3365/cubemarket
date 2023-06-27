@@ -1,7 +1,11 @@
 import Fastify from 'fastify'
 import ProductRepository from './repositories/ProductRepository'
-import { Product } from './models/Product'
+import { Product } from './models/DataTypes'
+import { User } from './models/DataTypes'
+import UserRepository from './repositories/UserRepository'
+type loginInput = { username: string; password: string }
 const productRepo = new ProductRepository()
+const userRepo = new UserRepository()
 
 const fastify = Fastify({
   logger: true,
@@ -13,12 +17,12 @@ fastify.get('/', async function (request, reply) {
 })
 
 // Authentication
-fastify.post('/api/auth/signup', () => {
-  return 'signup'
+fastify.post<{ Body: loginInput }>('/api/auth/signup', (request) => {
+  return userRepo.register(request.body)
 })
 
-fastify.post('/api/auth/signin', () => {
-  return 'signin'
+fastify.post<{ Body: loginInput }>('/api/auth/signin', (request) => {
+  return userRepo.login(request.body)
 })
 
 fastify.delete('/api/auth/unregister', () => {
@@ -30,7 +34,7 @@ fastify.post('/api/auth/logout', () => {
 })
 
 fastify.get('/api/me', () => {
-  return 'get me'
+  return []
 })
 
 fastify.patch('/api/me/notifications', () => {

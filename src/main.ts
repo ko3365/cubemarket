@@ -1,21 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
-import dotenv from 'dotenv'
-
-dotenv.config()
-/*
 function main() {
-    const message: string = 'World'
-    console.log(`Hello ${message}!`)
-  }
-  
-  main()
-*/
+  const message: string = 'World'
+  const json_obj = [{ id: 1, name: 'test1' }]
+  //console.log(json_obj.length)
+  console.log(json_obj[0]['id'])
+}
 
-const supabaseUrl = process.env.SUPABASE_URL as string
-const supabaseKey = process.env.SUPABASE_KEY as string
-const supabase = createClient(supabaseUrl, supabaseKey)
-
-//let { data: products, error } = await supabase.from('products').select('*')
-const { data, error } = await supabase.from('products').select('*') //.eq('id', '3')
-
-console.log(data)
+main()
