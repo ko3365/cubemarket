@@ -1,9 +1,9 @@
 import Fastify from 'fastify'
 import ProductRepository from './repositories/ProductRepository'
 import { Product } from './models/DataTypes'
-import { User } from './models/DataTypes'
+import { LoginInput } from './models/DataTypes'
 import UserRepository from './repositories/UserRepository'
-type loginInput = { username: string; password: string }
+
 const productRepo = new ProductRepository()
 const userRepo = new UserRepository()
 
@@ -17,16 +17,16 @@ fastify.get('/', async function (request, reply) {
 })
 
 // Authentication
-fastify.post<{ Body: loginInput }>('/api/auth/signup', (request) => {
+fastify.post<{ Body: LoginInput }>('/api/auth/signup', (request) => {
   return userRepo.register(request.body)
 })
 
-fastify.post<{ Body: loginInput }>('/api/auth/signin', (request) => {
+fastify.post<{ Body: LoginInput }>('/api/auth/signin', (request) => {
   return userRepo.login(request.body)
 })
 
-fastify.delete('/api/auth/unregister', () => {
-  return 'unregister'
+fastify.delete<{ Body: LoginInput }>('/api/auth/unregister', (request) => {
+  return userRepo.delete(request.body)
 })
 
 fastify.post('/api/auth/logout', () => {

@@ -1,4 +1,4 @@
-import { Database } from '../../lib/data_type'
+import { Database } from '../../lib/data_types'
 
 /*
 export type Product = {
@@ -7,4 +7,8 @@ export type Product = {
   created_at: string
 }
 */
-export type ProductType = Database['public']['Tables']['products']['Row']
+export type Product = Database['public']['Tables']['products']['Row']
+export type User = Database['public']['Tables']['users']['Row']
+export type ProductWithoutID = Omit<Product, 'id'>
+export type LoginInput = { username: string; password: string }
+export type UserInfo = Omit<User, 'password_hash' | 'created_at'>
