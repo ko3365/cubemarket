@@ -1,15 +1,15 @@
 import { UserInfo } from '../models/DataTypes'
 import { LoginInput } from '../models/DataTypes'
-//type UserWithoutIDandPwd = Omit<User, 'id' | 'password_hash'>
 import { supabase } from '../../lib/supabase'
+import { UserWithCookie } from '../models/DataTypes'
 import UserService from '../../services/UserService'
 const userService = new UserService()
 
 class UserRepository {
-  async register(params: LoginInput): Promise<UserInfo[] | null> {
+  async register(params: LoginInput): Promise<UserWithCookie | null> {
     return userService.register(params['username'], params['password'])
   }
-  async login(params: LoginInput): Promise<UserInfo[] | null> {
+  async login(params: LoginInput): Promise<UserWithCookie | null> {
     return userService.login(params['username'], params['password'])
   }
 

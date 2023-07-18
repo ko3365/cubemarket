@@ -1,15 +1,24 @@
 import Fastify from 'fastify'
+import type { FastifyCookieOptions } from '@fastify/cookie'
+import cookie from '@fastify/cookie'
+import dotenv from 'dotenv'
+import jwt from 'jsonwebtoken'
+
 import ProductRepository from './repositories/ProductRepository'
+import UserRepository from './repositories/UserRepository'
 import { Product } from './models/DataTypes'
 import { LoginInput } from './models/DataTypes'
-import UserRepository from './repositories/UserRepository'
 
 const productRepo = new ProductRepository()
 const userRepo = new UserRepository()
+dotenv.config()
+const jwtKey = process.env.JWT_KEY as string
 
 const fastify = Fastify({
   logger: true,
 })
+
+fastify.register(cookie, {})
 
 fastify.get('/', async function (request, reply) {
   //reply.send('hello world')
@@ -17,24 +26,36 @@ fastify.get('/', async function (request, reply) {
 })
 
 // Authentication
-fastify.post<{ Body: LoginInput }>('/api/auth/signup', (request) => {
-  return userRepo.register(request.body)
+fastify.post<{ Body: LoginInput }>('/api/auth/signup', async (request, reply) => {
+  const result = await userRepo.register(request.body)
+  if (result == null) {
+    return null
+  }
+  reply.setCookie('token', result.token, { path: '/' })
+  return result.user
 })
 
-fastify.post<{ Body: LoginInput }>('/api/auth/signin', (request) => {
-  return userRepo.login(request.body)
+fastify.post<{ Body: LoginInput }>('/api/auth/signin', async (request, reply) => {
+  const result = await userRepo.login(request.body)
+  if (result == null) {
+    return null
+  }
+  reply.setCookie('token', result.token, { path: '/' })
+  return result.user
 })
 
 fastify.delete<{ Body: LoginInput }>('/api/auth/unregister', (request) => {
   return userRepo.delete(request.body)
 })
 
-fastify.post('/api/auth/logout', () => {
+fastify.post('/api/auth/logout', (request, reply) => {
+  reply.clearCookie('token')
   return 'logout'
 })
 
-fastify.get('/api/me', () => {
-  return []
+fastify.get('/api/me', (request) => {
+  const me = jwt.verify(request.cookies.token, jwtKey)
+  return me
 })
 
 fastify.patch('/api/me/notifications', () => {
