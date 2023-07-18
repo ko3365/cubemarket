@@ -10,7 +10,6 @@ dotenv.config()
 const jwtKey = process.env.JWT_KEY as string
 
 class UserService {
-  // create token method 추가하기
   async register(name: string, password: string): Promise<UserWithToken | null> {
     const usercheck = await this.findByUsername(name)
     if (usercheck?.length != 0) {
@@ -23,7 +22,7 @@ class UserService {
       return null
     }
     const user = { id: data[0].id, username: data[0].username }
-    const token = this.accessToken(user)
+    const token = this.generateAccessToken(user)
 
     return { user, token }
   }
@@ -38,7 +37,7 @@ class UserService {
     }
     if (await argon2.verify(usercheck[0]['password_hash'], password)) {
       const user = { id: usercheck[0].id, username: usercheck[0].username }
-      const token = this.accessToken(user)
+      const token = this.generateAccessToken(user)
       console.log('user verified')
       return { user, token }
     } else {
@@ -76,7 +75,7 @@ class UserService {
     return data
   }
 
-  accessToken(user: UserInfo) {
+  generateAccessToken(user: UserInfo) {
     const token = jwt.sign(user, jwtKey)
     return token
   }

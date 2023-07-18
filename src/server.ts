@@ -28,7 +28,7 @@ fastify.get('/', async function (request, reply) {
 // Authentication
 fastify.post<{ Body: LoginInput }>('/api/auth/signup', async (request, reply) => {
   const result = await userRepo.register(request.body)
-  if (result == null) {
+  if (!result) {
     return null
   }
   reply.setCookie('token', result.token, { path: '/' })
@@ -37,7 +37,7 @@ fastify.post<{ Body: LoginInput }>('/api/auth/signup', async (request, reply) =>
 
 fastify.post<{ Body: LoginInput }>('/api/auth/signin', async (request, reply) => {
   const result = await userRepo.login(request.body)
-  if (result == null) {
+  if (!result) {
     return null
   }
   reply.setCookie('token', result.token, { path: '/' })
@@ -53,9 +53,14 @@ fastify.post('/api/auth/logout', (request, reply) => {
   return 'logout'
 })
 
-fastify.get('/api/me', (request) => {
-  const me = jwt.verify(request.cookies.token, jwtKey)
-  return me
+fastify.get('/api/me', (request, reply) => {
+  try {
+    const me = jwt.verify(request.cookies.token, jwtKey)
+    return me
+  } catch (err) {
+    reply.code(401) // 권한없음
+    throw new Error('not logged in')
+  }
 })
 
 fastify.patch('/api/me/notifications', () => {
