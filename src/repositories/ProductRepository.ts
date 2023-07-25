@@ -30,7 +30,6 @@ class ProductRepository {
   }
 
   async findById(id: number): Promise<Product[] | null> {
-    const id_string = id.toString()
     const { data, error } = await supabase.from('products').select('*').eq('id', id)
     return data
 
@@ -48,12 +47,7 @@ class ProductRepository {
     */
   }
 
-  async updateById(
-    id: number,
-    params: Omit<ProductWithoutID, 'username'>,
-    me: UserInfo
-  ): Promise<Product[] | null> {
-    const id_string = id.toString()
+  async updateById(id: number, params: Omit<ProductWithoutID, 'username'>, me: UserInfo): Promise<Product[] | null> {
     const username = me.username
     const result = await this.findById(id)
     if (!result) {
@@ -62,11 +56,7 @@ class ProductRepository {
     if (result[0].username != username) {
       throw new Error('unathorized')
     } else {
-      const { data, error } = await supabase
-        .from('products')
-        .update({ name: params.name })
-        .eq('id', id)
-        .select('*')
+      const { data, error } = await supabase.from('products').update({ name: params.name }).eq('id', id).select('*')
       return data
     }
     //: Product | null{
