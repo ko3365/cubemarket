@@ -1,6 +1,7 @@
 import { Product } from '../models/DataTypes'
 import { ProductWithoutID } from '../models/DataTypes'
 import { supabase } from '../../lib/supabase'
+import { UserInfo } from '../models/DataTypes'
 
 class ProductRepository {
   /*nextId = 1
@@ -16,8 +17,8 @@ class ProductRepository {
     return itemIndex
   }*/
 
-  async create(params: Omit<Product, 'id'>): Promise<Product[] | null> {
-    const product = { ...params }
+  async create(params: Omit<Product, 'id'>, me: UserInfo): Promise<Product[] | null> {
+    const product = { ...params, username: me.username }
     const { data, error } = await supabase.from('products').insert(product).select('*')
     return data
   }
@@ -30,7 +31,7 @@ class ProductRepository {
 
   async findById(id: number): Promise<Product[] | null> {
     const id_string = id.toString()
-    const { data, error } = await supabase.from('products').select('*').eq('id', id_string)
+    const { data, error } = await supabase.from('products').select('*').eq('id', id)
     return data
 
     //: Product | null{
@@ -47,16 +48,27 @@ class ProductRepository {
     */
   }
 
-  async updateById(id: number, params: ProductWithoutID): Promise<Product[] | null> {
+  async updateById(
+    id: number,
+    params: Omit<ProductWithoutID, 'username'>,
+    me: UserInfo
+  ): Promise<Product[] | null> {
     const id_string = id.toString()
-    const product = { ...params }
-    const { data, error } = await supabase
-      .from('products')
-      .update(product)
-      .eq('id', id_string)
-      .select('*')
-    return data
-
+    const username = me.username
+    const result = await this.findById(id)
+    if (!result) {
+      return null
+    }
+    if (result[0].username != username) {
+      throw new Error('unathorized')
+    } else {
+      const { data, error } = await supabase
+        .from('products')
+        .update({ name: params.name })
+        .eq('id', id)
+        .select('*')
+      return data
+    }
     //: Product | null{
     /*
     const itemIndex = this.findIndexById(id)

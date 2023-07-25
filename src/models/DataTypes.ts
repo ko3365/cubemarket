@@ -12,4 +12,4 @@ export type User = Database['public']['Tables']['users']['Row']
 export type ProductWithoutID = Omit<Product, 'id'>
 export type LoginInput = { username: string; password: string }
 export type UserInfo = Omit<User, 'password_hash' | 'created_at'>
-export type UserWithCookie = { user: { id: number; username: string }; token: string }
+export type UserWithToken = { user: { id: number; username: string }; token: string }

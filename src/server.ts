@@ -1,16 +1,18 @@
 import Fastify from 'fastify'
-import type { FastifyCookieOptions } from '@fastify/cookie'
 import cookie from '@fastify/cookie'
 import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
 
 import ProductRepository from './repositories/ProductRepository'
 import UserRepository from './repositories/UserRepository'
+
 import { Product } from './models/DataTypes'
+import { ProductWithoutID } from './models/DataTypes'
 import { LoginInput } from './models/DataTypes'
 
 const productRepo = new ProductRepository()
 const userRepo = new UserRepository()
+
 dotenv.config()
 const jwtKey = process.env.JWT_KEY as string
 
@@ -58,8 +60,8 @@ fastify.get('/api/me', (request, reply) => {
     const me = jwt.verify(request.cookies.token, jwtKey)
     return me
   } catch (err) {
-    reply.code(401) // 권한없음
-    throw new Error('not logged in')
+    reply.code(401) // unauthorized
+    throw new Error('unauthorized')
   }
 })
 
@@ -72,8 +74,14 @@ fastify.get('/api/products', () => {
   return productRepo.findAll()
 })
 
-fastify.post<{ Body: Omit<Product, 'id'> }>('/api/products', (request) => {
-  return productRepo.create(request.body)
+fastify.post<{ Body: Omit<Product, 'id'> }>('/api/products', (request, reply) => {
+  try {
+    const me = jwt.verify(request.cookies.token, jwtKey)
+    return productRepo.create(request.body, me)
+  } catch (err) {
+    reply.code(401) // unauthorized
+    throw new Error('unauthorized')
+  }
 })
 
 fastify.get<{ Params: { id: string } }>('/api/products/:id', (request) => {
@@ -82,11 +90,17 @@ fastify.get<{ Params: { id: string } }>('/api/products/:id', (request) => {
   return productRepo.findById(id)
 })
 
-fastify.put<{ Params: { id: string }; Body: Omit<Product, 'id'> }>(
+fastify.put<{ Params: { id: string }; Body: Omit<ProductWithoutID, 'username'> }>(
   '/api/products/:id',
-  (request) => {
+  (request, reply) => {
     const id = parseInt(request.params.id, 10)
-    return productRepo.updateById(id, request.body)
+    try {
+      const me = jwt.verify(request.cookies.token, jwtKey)
+      return productRepo.updateById(id, request.body, me)
+    } catch (err) {
+      reply.code(401) // unauthorized
+      throw new Error('not logged in')
+    }
   }
 )
 

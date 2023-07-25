@@ -18,7 +18,7 @@ class UserService {
     const hash = await argon2.hash(password)
     const user_password = { username: name, password_hash: hash }
     const { data, error } = await supabase.from('users').insert(user_password).select('id,username')
-    if (data == null) {
+    if (!data) {
       return null
     }
     const user = { id: data[0].id, username: data[0].username }
@@ -29,7 +29,7 @@ class UserService {
 
   async login(name: string, password: string): Promise<UserWithToken | null> {
     const usercheck = await this.findByUsername(name)
-    if (usercheck == null) {
+    if (!usercheck) {
       return null
     }
     if (usercheck.length == 0) {
@@ -47,7 +47,7 @@ class UserService {
 
   async delete(name: string, password: string): Promise<UserInfo[] | null> {
     const usercheck = await this.findByUsername(name)
-    if (usercheck == null) {
+    if (!usercheck) {
       return null
     }
     if (usercheck.length == 0) {
@@ -59,7 +59,7 @@ class UserService {
         .delete()
         .eq('id', usercheck[0].id)
         .select('*')
-      if (data != null) {
+      if (data) {
         const user = [{ id: data[0].id, username: data[0].username }]
         return user
       } else {
