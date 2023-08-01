@@ -1,4 +1,4 @@
-import { Database } from '../../lib/data_types'
+import { Database } from '../lib/data_types'
 
 /*
 export type Product = {

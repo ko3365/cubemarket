@@ -1,7 +1,7 @@
-import { User } from '../src/models/DataTypes'
+import { User } from '../models/DataTypes'
 import { supabase } from '../lib/supabase'
-import { UserInfo } from '../src/models/DataTypes'
-import { UserWithToken } from '../src/models/DataTypes'
+import { UserInfo } from '../models/DataTypes'
+import { UserWithToken } from '../models/DataTypes'
 import * as argon2 from 'argon2'
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
@@ -45,28 +45,14 @@ class UserService {
     }
   }
 
-  async delete(name: string, password: string): Promise<UserInfo[] | null> {
-    const usercheck = await this.findByUsername(name)
+  async delete(me: UserInfo): Promise<UserInfo[] | null> {
+    const username = me.username
+    const usercheck = await this.findByUsername(username)
     if (!usercheck) {
       return null
-    }
-    if (usercheck.length == 0) {
-      throw new Error('User not found')
-    }
-    if (await argon2.verify(usercheck[0]['password_hash'], password)) {
-      const { data, error } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', usercheck[0].id)
-        .select('*')
-      if (data) {
-        const user = [{ id: data[0].id, username: data[0].username }]
-        return user
-      } else {
-        return null
-      }
     } else {
-      return null
+      const { data, error } = await supabase.from('users').delete().eq('id', usercheck[0].id).select('*')
+      return [{ id: me.id, username: me.username }]
     }
   }
 
