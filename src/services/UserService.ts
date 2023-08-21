@@ -9,6 +9,8 @@ import dotenv from 'dotenv'
 dotenv.config()
 const jwtKey = process.env.JWT_KEY as string
 
+import { generateAccessToken } from '../lib/jwtToken'
+
 class UserService {
   async register(name: string, password: string): Promise<UserWithToken | null> {
     const usercheck = await this.findByUsername(name)
@@ -22,7 +24,7 @@ class UserService {
       return null
     }
     const user = { id: data[0].id, username: data[0].username }
-    const token = this.generateAccessToken(user)
+    const token = generateAccessToken(user)
 
     return { user, token }
   }
@@ -37,7 +39,7 @@ class UserService {
     }
     if (await argon2.verify(usercheck[0]['password_hash'], password)) {
       const user = { id: usercheck[0].id, username: usercheck[0].username }
-      const token = this.generateAccessToken(user)
+      const token = generateAccessToken(user)
       console.log('user verified')
       return { user, token }
     } else {
@@ -59,11 +61,6 @@ class UserService {
   async findByUsername(name: string): Promise<User[] | null> {
     const { data, error } = await supabase.from('users').select('*').eq('username', name)
     return data
-  }
-
-  generateAccessToken(user: UserInfo) {
-    const token = jwt.sign(user, jwtKey)
-    return token
   }
 }
 

@@ -1,14 +1,9 @@
 import Fastify from 'fastify'
 import cookie from '@fastify/cookie'
 import dotenv from 'dotenv'
-import jwt from 'jsonwebtoken'
 
 import ProductRepository from './repositories/ProductRepository'
 import UserRepository from './repositories/UserRepository'
-
-import { Product } from './models/DataTypes'
-import { ProductWithoutID } from './models/DataTypes'
-import { LoginInput } from './models/DataTypes'
 
 import apiRoute from './api'
 
