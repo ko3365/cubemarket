@@ -18,6 +18,7 @@ const fastify = Fastify({
 })
 
 fastify.register(cookie, {})
+
 fastify.register(apiRoute, { prefix: '/api' })
 
 fastify.get('/', async function (request, reply) {

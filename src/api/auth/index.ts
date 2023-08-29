@@ -1,9 +1,8 @@
 import dotenv from 'dotenv'
-import jwt from 'jsonwebtoken'
 
 import { FastifyPluginAsync } from 'fastify'
-import { verifyAccessToken } from '../../lib/jwtToken'
 import { LoginInput } from '../../models/DataTypes'
+import { fp_authPlugin } from '../../plugins/auth'
 
 import UserRepository from '../../repositories/UserRepository'
 
@@ -13,7 +12,8 @@ dotenv.config()
 const jwtKey = process.env.JWT_KEY as string
 
 const authRoute: FastifyPluginAsync = async (fastify) => {
-  let me = undefined
+  fastify.register(fp_authPlugin)
+
   fastify.post<{ Body: LoginInput }>('/signup', async (request, reply) => {
     const result = await userRepo.register(request.body)
     if (!result) {
@@ -33,23 +33,16 @@ const authRoute: FastifyPluginAsync = async (fastify) => {
   })
 
   fastify.delete('/unregister', (request, reply) => {
-    if (!(me === undefined)) {
-      return userRepo.delete(me)
-    } else {
+    if (!request.user) {
       reply.code(401)
       throw new Error('unauthorized')
     }
+    return userRepo.delete(request.user)
   })
 
   fastify.post('/logout', (request, reply) => {
     reply.clearCookie('token')
     return 'logout'
-  })
-
-  fastify.addHook<{ Body: LoginInput }>('onRequest', async (request, reply) => {
-    if (!(request.cookies.token === undefined)) {
-      me = verifyAccessToken(request.cookies.token)
-    }
   })
 }
 

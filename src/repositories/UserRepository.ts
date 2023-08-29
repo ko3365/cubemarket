@@ -14,7 +14,7 @@ class UserRepository {
   }
 
   async delete(me: UserInfo) {
-    userService.delete(me)
+    return userService.delete(me)
   }
 
   async findAll(): Promise<UserInfo[] | null> {
